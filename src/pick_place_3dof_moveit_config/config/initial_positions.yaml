@@ -1,0 +1,6 @@
+# Default initial positions for pick_place_3dof's ros2_control fake system
+
+initial_positions:
+  joint1_waist: 0
+  joint2_shoulder: 0
+  joint3_elbow: 0
