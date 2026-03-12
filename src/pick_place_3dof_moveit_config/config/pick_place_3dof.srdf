@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--This does not replace URDF, and is not an extension of URDF.
-    This is a format for representing semantic information about the robot structure.
-    A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
--->
 <robot name="pick_place_3dof">
-    <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
-    <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
-    <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
-    <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
-    <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
+
+    <!-- ARM GROUP: chain from base_link to tcp (includes gripper_base via fixed joints) -->
     <group name="arm">
-        <chain base_link="base_link" tip_link="link3"/>
+        <chain base_link="base_link" tip_link="tcp"/>
     </group>
-    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="gripper" parent_link="link3" group="arm" parent_group="arm"/>
-    <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
+
+    <!-- GRIPPER GROUP: the two finger joints -->
+    <group name="gripper">
+        <joint name="gripper_left_joint"/>
+        <joint name="gripper_right_joint"/>
+    </group>
+
+    <!-- END EFFECTOR: gripper group attached at tcp -->
+    <end_effector name="gripper" parent_link="tcp" group="gripper" parent_group="arm"/>
+
+    <!-- VIRTUAL JOINT: anchors base_link to the world frame defined in your URDF -->
     <virtual_joint name="world_joint" type="fixed" parent_frame="world" child_link="base_link"/>
-    <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->
+
+    <!-- PASSIVE JOINTS: gripper_right mimics gripper_left, both are passive for planning -->
+    <passive_joint name="gripper_left_joint"/>
     <passive_joint name="gripper_right_joint"/>
-    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+
+    <!-- DISABLE COLLISIONS -->
     <disable_collisions link1="base_link" link2="gripper_base" reason="Never"/>
     <disable_collisions link1="base_link" link2="gripper_finger_left" reason="Never"/>
     <disable_collisions link1="base_link" link2="gripper_finger_right" reason="Never"/>
     <disable_collisions link1="base_link" link2="link1" reason="Adjacent"/>
     <disable_collisions link1="base_link" link2="link2" reason="Never"/>
     <disable_collisions link1="base_link" link2="link3" reason="Never"/>
+    <disable_collisions link1="base_link" link2="tcp" reason="Never"/>
     <disable_collisions link1="gripper_base" link2="gripper_finger_left" reason="Adjacent"/>
     <disable_collisions link1="gripper_base" link2="gripper_finger_right" reason="Adjacent"/>
     <disable_collisions link1="gripper_base" link2="link1" reason="Never"/>
@@ -40,4 +45,6 @@
     <disable_collisions link1="link1" link2="link2" reason="Adjacent"/>
     <disable_collisions link1="link1" link2="link3" reason="Never"/>
     <disable_collisions link1="link2" link2="link3" reason="Adjacent"/>
+    <disable_collisions link1="link3" link2="tcp" reason="Never"/>
+
 </robot>
